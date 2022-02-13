@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 from time import sleep
+from sqlalchemy import create_engine
 import openFile
 
 
@@ -32,9 +33,6 @@ for line in initFile:
         lineCount = 0
     elif lineCount == 5:
         lineCount = 0
-
-print(vocabWords)
-print(oldWords)
 
 for word in vocabWords:
     # Scrape the webpage for the word, pronunciation, parts of speech, and the definition
@@ -67,27 +65,15 @@ for word in vocabWords:
         sleep(10)
         requestCount = 0
 
-
 # Create a dataframe & save results locally for future use
 df = pd.DataFrame(vocabDict.values(), index=vocabDict.keys())
 df.reset_index(inplace=True)
 df.columns = ['Word', 'Definition']
 df.to_csv('VocabWords.csv')
-print(df.head())
 
-
-"""
-BRUTE FORCE METHOD
-
-long_def = soup.find_all('body')[0].get_text()
-
-
-lword = long_def.partition('complexity.')
-rword = lword[2].partition(']')
-ldef = lword[2].partition('complexity.')
-rdef = ldef[2].partition('.')
-print(rword[0] + rword[1], rdef[0])
-"""
+# Write DataFrame to Postgresql database
+engine = create_engine(openFile.getEngine())
+df = df.to_sql(name="Vocab Pipeline", con=engine, index_label='id')
 
 # Close initial file
 initFile.close()
