@@ -8,7 +8,7 @@ import openFile
 initFile = openFile.getFile()
 
 try:
- oldWords = pd.read_csv('VocabWords.csv').iloc[:,0]
+ oldWords = pd.read_csv('VocabWords.csv', index_col=[0]).iloc[:,0]
 except:
     oldWords = []
 
@@ -26,7 +26,7 @@ oldWords = oldWords.to_list()
 for line in initFile:
     lineCount += 1
     if lineCount == 5 and len(line) < 50:
-        simpLine = line.rstrip(",. \n\"\”")
+        simpLine = line.rstrip(",. \n\"\”\'\"\;\“")
         if (simpLine not in vocabWords) & (simpLine not in oldWords):
             vocabWords.append(simpLine)
         lineCount = 0
@@ -69,10 +69,11 @@ for word in vocabWords:
 
 
 # Create a dataframe & save results locally for future use
-df = pd.DataFrame(vocabDict.values(), index=vocabDict.keys(), columns= ['Definition'])
-
+df = pd.DataFrame(vocabDict.values(), index=vocabDict.keys())
+df.reset_index(inplace=True)
+df.columns = ['Word', 'Definition']
 df.to_csv('VocabWords.csv')
-
+print(df.head())
 
 
 """
